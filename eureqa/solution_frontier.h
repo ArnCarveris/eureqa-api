@@ -140,7 +140,7 @@ std::string solution_frontier::to_string() const
     for (int i=0; i<size(); ++i)
     {
         os << front_[i].complexity_ << '\t';
-        os << front_[i].fitness_ << '\t';
+        os << -front_[i].fitness_ << '\t';
         os << front_[i].text_ << std::endl;
     }
     return os.str();
