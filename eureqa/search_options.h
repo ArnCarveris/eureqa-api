@@ -22,7 +22,8 @@ const static int bayesian_information =  8;
 const static int maximum_error        =  9;
 const static int median_error         = 10;
 const static int implicit_error       = 11;
-const static int count                = 12;
+const static int slope_error          = 12;
+const static int count                = 13;
 std::string str(int type);
 }
 
@@ -86,6 +87,7 @@ std::string str(int type)
     case maximum_error:        return "Maximum Error";
     case median_error:         return "Median Error";
     case implicit_error:       return "Implicit Derivative Error";
+	case slope_error:          return "Slope Error";
     default:                   return "Unknown?";
     }
 }
