@@ -91,7 +91,7 @@ public:
     bool send_options(const eureqa::search_options& options);
     
     // send server individuals to insert into its population
-    bool send_individuals(std::string soln);
+    bool send_individuals(std::string text);
     bool send_individuals(eureqa::solution_info soln);
     bool send_individuals(const std::vector<eureqa::solution_info>& individuals);
 
