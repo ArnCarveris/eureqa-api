@@ -249,8 +249,6 @@ bool data_set::import_ascii(std::istream& is, std::string& error_msg)
         if (x_col >= 0 && x_count >= 0 && i >= (int)X_.size1()) { X_.resize(data_points*2, x_count, true); }
         if (y_col >= 0 && y_count >= 0 && i >= (int)Y_.size1()) { Y_.resize(data_points*2, y_count, true); }
         
-        if ((i&0xff) == 0) { std::cout << i << '\n'; }
-        
         // fill the new row
         for (int j=0; j<data_cols; ++j)
         {
