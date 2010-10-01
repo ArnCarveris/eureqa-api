@@ -32,10 +32,12 @@ static const int send_data_set      = 101;
 static const int send_data_location = 102;
 static const int send_options       = 103;
 static const int send_individuals   = 104;
+static const int send_population    = 105;
 static const int query_progress     = 201;
 static const int query_server_info  = 202;
 static const int query_individuals  = 203;
 static const int query_frontier     = 204;
+static const int query_population   = 205;
 static const int start_search       = 301;
 static const int pause_search       = 302;
 static const int end_search         = 303;
@@ -93,6 +95,9 @@ public:
 	bool send_individuals(eureqa::solution_info soln);
 	bool send_individuals(const std::vector<eureqa::solution_info>& individuals);
 
+	// send server a population
+	bool send_population(const std::vector<eureqa::solution_info>& individuals);
+
 	// query server for information on the search progress
 	bool query_progress(eureqa::search_progress& progress);
 	
@@ -102,6 +107,9 @@ public:
 	// query server for random individuals from its population
 	bool query_individuals(eureqa::solution_info& soln);
 	bool query_individuals(std::vector<eureqa::solution_info>& individuals, int count);
+
+	// query server for the current population
+	bool query_population(std::vector<eureqa::solution_info>& individuals);
 	
 	// query the servers local solution frontier
 	bool query_frontier(eureqa::solution_frontier& front);
@@ -120,7 +128,7 @@ public:
 	std::string remote_address() const;
 	int remote_port() const;
 	
-protected:
+//protected:
 	bool connect_socket(std::string hostname, int port);
 
 	template<typename T> bool write_fixed(const T& val);
@@ -229,6 +237,20 @@ bool connection::send_individuals(const std::vector<solution_info>& individuals)
 }
 
 inline
+bool connection::send_population(const std::vector<eureqa::solution_info>& individuals)
+{
+	// serialize the data set
+	std::ostringstream ss;
+	boost::archive::xml_oarchive ar(ss);
+	ar << boost::serialization::make_nvp("vector_solution_info", individuals );
+	
+	// send a command-code, packet size, and data packet
+	if (!write_command_packet(commands::send_population, ss.str())) { return false; }
+	if (!read_response()) { return false; }
+	return true;
+}
+
+inline
 bool connection::query_progress(eureqa::search_progress& progress)
 {
 	// request progress
@@ -277,6 +299,23 @@ bool connection::query_individuals(std::vector<solution_info>& individuals, int 
 {
 	// request individuals
 	if (!write_command_fixed(commands::query_individuals, count)) { return false; }
+	
+	// read packet
+	std::string s;
+	if (!read_packet(s)) { return false; }
+	
+	// serialize
+	std::istringstream ss(s);
+	boost::archive::xml_iarchive ar(ss);
+	ar >> boost::serialization::make_nvp("vector_solution_info", individuals );
+	return true;
+}
+
+inline
+bool connection::query_population(std::vector<eureqa::solution_info>& individuals)
+{
+	// request individuals
+	if (!this->write_command(commands::query_population)) { return false; }
 	
 	// read packet
 	std::string s;

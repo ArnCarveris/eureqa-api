@@ -23,7 +23,8 @@ const static int maximum_error        =  9;
 const static int median_error         = 10;
 const static int implicit_error       = 11;
 const static int slope_error          = 12;
-const static int count                = 13;
+const static int stats_error          = 13;
+const static int count                = 14;
 std::string str(int type);
 }
 
@@ -93,6 +94,7 @@ std::string str(int type)
 	case median_error:         return "Median Error";
 	case implicit_error:       return "Implicit Derivative Error";
 	case slope_error:          return "Slope Error";
+	case stats_error:          return "Error-Statistical Score";
 	default:                   return "Unknown?";
 	}
 }
