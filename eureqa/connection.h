@@ -451,7 +451,7 @@ bool connection::connect_socket(std::string hostname, int port)
 		if (error) { socket_.close(); }
 		return !error;
 	}
-	catch (...) { return false; }
+	catch (std::exception&) { return false; }
 }
 
 template<typename T>
