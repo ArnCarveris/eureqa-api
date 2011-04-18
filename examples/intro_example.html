@@ -1,0 +1,92 @@
+<html>
+<head>
+<style type="text/css">
+
+body
+{
+background-color:white;
+}
+
+a:link    { text-decoration:none; } 
+a:visited { text-decoration:none; }
+a:hover   { text-decoration:underline; }
+a:active  { text-decoration:underline; color:red; }
+
+.code
+{
+font-family: "Courier New";
+font-size:9pt;
+}
+
+.keyword
+{
+font-weight:normal;
+color: blue;
+}
+.value
+{
+font-weight:normal;
+color: darkred;
+}
+.class
+{
+font-weight:bold;
+color:black;
+}
+.comment
+{
+font-weight:normal;
+color: green;
+}
+.std
+{
+font-weight:normal;
+color: gray;
+}
+.op
+{
+font-weight:bold;
+color:black;
+}
+.func
+{
+font-weight:normal;
+color: black;
+}
+
+</style>
+</head>
+<body>
+
+<span class="code">
+<span class="keyword">#include</span> <a target="_top" class="value" href="http://code.google.com/p/eureqa-api/source/browse/trunk/eureqa/eureqa.h">&lt;eureqa/eureqa.h&gt;</a><br>
+<span class="keyword">#include</span> <span class="value" >&lt;iostream&gt;</span><br>
+<br>
+<span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])<br>
+{<br>
+&nbsp;&nbsp;<span class="comment">// initialize data set and options</span><br>
+&nbsp;&nbsp;<a target="_top" class="class" href="http://code.google.com/p/eureqa-api/wiki/doc_data_set">eureqa::data_set</a> <a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_data_set_constructor">data</a>(<a target="_top" class="value" href="http://code.google.com/p/eureqa-api/source/browse/trunk/examples/data_sets/default_data.txt">"my_data.txt"</a>);<br>
+&nbsp;&nbsp;<a target="_top" class="class" href="http://code.google.com/p/eureqa-api/wiki/doc_search_options">eureqa::search_options</a> <a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_search_options_constructor">options</a>(<span class="value">"y = f(x)"</span>);<br>
+<br>
+&nbsp;&nbsp;<span class="comment">// connect to a eureqa server</span><br>
+&nbsp;&nbsp;<a target="_top" class="class" href="http://code.google.com/p/eureqa-api/wiki/doc_connection">eureqa::connection</a> <a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_connection_constructor">conn</a>(<span class="value">"127.0.0.1"</span>);<br>
+&nbsp;&nbsp;<a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_connection_send_data_set">conn.send_data_set</a>(data);<br>
+&nbsp;&nbsp;<a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_connection_send_options">conn.send_options</a>(options);<br>
+&nbsp;&nbsp;<a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_connection_start_search">conn.start_search</a>();<br>
+<br>
+&nbsp;&nbsp;<span class="comment">// display results</span><br>
+&nbsp;&nbsp;<a target="_top" class="class" href="http://code.google.com/p/eureqa-api/wiki/doc_search_progress">eureqa::search_progress</a> <a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_search_progress_constructor">progress</a>;<br>
+&nbsp;&nbsp;<a target="_top" class="class" href="http://code.google.com/p/eureqa-api/wiki/doc_solution_frontier">eureqa::solution_frontier</a> <a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_solution_frontier_constructor">solutions</a>;<br>
+<br>
+&nbsp;&nbsp;<span class="keyword">while</span> (<a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_connection_query_progress">conn.query_progress</a>(progress))<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_solution_frontier_add">solutions.add</a>(progress.solution_);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="std">std::cout</span> <span class="op">&lt;&lt;</span> <a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_search_progress_summary">progress.summary</a>() <span class="op">&lt;&lt;</span> <span class="std">std::endl</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="std">std::cout</span> <span class="op">&lt;&lt;</span> <a target="_top" class="func" href="http://code.google.com/p/eureqa-api/wiki/doc_solution_frontier_to_string">solutions.to_string</a>() <span class="op">&lt;&lt;</span> <span class="std">std::endl</span>;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">return</span> <span class="value">0</span>;<br>
+}<br>
+</span>
+
+</body>
+</html>
