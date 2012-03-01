@@ -1,6 +1,8 @@
 #ifndef EUREQA_BEST_SOLUTIONS_H
 #define EUREQA_BEST_SOLUTIONS_H
 
+#include <cmath>
+
 namespace eureqa
 {
 // information about a solution
@@ -12,15 +14,15 @@ public:
 	float fitness_; // fitness value of the solution
 	float complexity_; // complexity of the solution
 	unsigned int age_; // genotypic age of the solution
-	
+
 public:
 	// constructor
 	solution_info(std::string text = "") : text_(text), score_(-1e30f), fitness_(-1e30f), age_(0) { }
-	
+
 	// tests if the solution dominates another solution in fitness and complexity
 	bool dominates(const solution_info& s) const;
 	bool matches(const solution_info& s) const;
-	
+
 protected:
 	// boost serialization, used for sending over it the network
 	// can also be used for saving/loading the data set
@@ -42,25 +44,25 @@ protected:
 	// set of the highest fit solutions for differnt complexities
 	// ordered from most complex to least
 	std::vector<solution_info> front_;
-	
+
 public:
 	// adds solution to the pareto front if non-dominated
 	// and removes any existing dominated by the solution
 	bool add(const solution_info& soln);
-	
+
 	// tests if a solution is non-dominated and not already on the current frontier
 	bool test(solution_info soln) const;
-	
+
 	// returns a text display of the frontier
 	std::string to_string() const;
-	
+
 	// basic container functions
 	int size() const { return (int)front_.size(); }
 	solution_info& operator [](int i) { return front_[i]; }
 	const solution_info& operator [](int i) const { return front_[i]; }
 	void clear() { front_.clear(); }
 	void remove(int i) { front_.erase(front_.begin()+i); }
-	
+
 protected:
 	// boost serialization, used for sending over it the network
 	// can also be used for saving/loading the data set
@@ -76,7 +78,7 @@ struct by_descending_fitness
 {
 	bool operator ()(const solution_info& a, const solution_info& b) const
 	{
-		return (a.fitness_ > b.fitness_) 
+		return (a.fitness_ > b.fitness_)
 			|| (a.fitness_ == b.fitness_ && a.complexity_ < b.complexity_);
 	}
 };
@@ -85,7 +87,7 @@ struct by_descending_score
 {
 	bool operator ()(const solution_info& a, const solution_info& b) const
 	{
-		return (a.score_ > b.score_) 
+		return (a.score_ > b.score_)
 			|| (a.score_ == b.score_ && a.complexity_ < b.complexity_);
 	}
 };
@@ -93,8 +95,8 @@ struct by_descending_score
 inline
 bool solution_info::dominates(const solution_info& s) const
 {
-	return (fitness_ >= s.fitness_ && complexity_ < s.complexity_)
-		|| (fitness_ > s.fitness_ && complexity_ <= s.complexity_);
+	return (fitness_ <= s.fitness_ && complexity_ < s.complexity_)
+		|| (fitness_ < s.fitness_ && complexity_ <= s.complexity_);
 }
 
 inline
@@ -114,7 +116,7 @@ bool solution_frontier::add(const solution_info& soln)
 	{
 		if (soln.dominates(front_[i])) { remove(i); }
 	}
-	
+
 	// add and sort
 	front_.push_back(soln);
 	std::sort(front_.begin(), front_.end(), by_descending_score());
@@ -135,19 +137,19 @@ inline
 std::string solution_frontier::to_string() const
 {
 	std::ostringstream os;
-	os << "Size:\tFitness:\tEquation:" << std::endl;
-	os << "-----\t--------\t---------" << std::endl;
+	os << std::left << std::setw(6) << "Size:" << ' ' << std::left << std::setw(9) << "Fitness:" << ' ' << "Equation:\n";
+	os << std::left << std::setw(6) << "-----" << ' ' << std::left << std::setw(9) << "--------" << ' ' << "---------\n";
 	for (int i=0; i<size(); ++i)
 	{
-		os << front_[i].complexity_ << '\t';
-		os << -front_[i].fitness_ << '\t';
-		os << front_[i].text_ << std::endl;
+		os << std::left << std::setw(6) << front_[i].complexity_ << ' ';
+		os << std::left << std::setw(9) << front_[i].fitness_ << ' ';
+		os << front_[i].text_ << '\n';
 	}
 	return os.str();
 }
 
-template<class TArchive> 
-inline 
+template<class TArchive>
+inline
 void solution_info::serialize(TArchive& ar, const unsigned int /*version*/)
 {
 	ar & BOOST_SERIALIZATION_NVP( text_ );
@@ -155,10 +157,17 @@ void solution_info::serialize(TArchive& ar, const unsigned int /*version*/)
 	ar & BOOST_SERIALIZATION_NVP( fitness_ );
 	ar & BOOST_SERIALIZATION_NVP( complexity_ );
 	ar & BOOST_SERIALIZATION_NVP( age_ );
+
+	// use positive fitness convention (old versions are negative)
+	if (TArchive::is_loading::value)
+	{
+		// TEMP: just force the absolute value for now
+		if (fitness_ < 0) { fitness_ = -fitness_; }
+	}
 }
 
-template<class TArchive> 
-inline 
+template<class TArchive>
+inline
 void solution_frontier::serialize(TArchive& ar, const unsigned int /*version*/)
 {
 	ar & BOOST_SERIALIZATION_NVP( front_ );
