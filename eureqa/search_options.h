@@ -12,19 +12,30 @@ namespace fitness_types
 {
 const static int absolute_error       =  0;
 const static int squared_error        =  1;
-const static int root_squared_error   =  2;
-const static int logarithmic_error    =  3;
-const static int explog_error         =  4;
-const static int correlation          =  5;
-const static int minimize_difference  =  6;
-const static int akaike_information   =  7;
-const static int bayesian_information =  8;
-const static int maximum_error        =  9;
-const static int median_error         = 10;
-const static int implicit_error       = 11;
-const static int slope_error          = 12;
-const static int stats_error          = 13;
-const static int count                = 14;
+const static int r_squared_error      =  2;
+const static int correlation          =  3;
+const static int maximum_error        =  4;
+const static int logarithmic_error    =  5;
+const static int median_error         =  6;
+const static int iqr_absolute_error   =  7;
+const static int minimize_difference  =  8;
+const static int hybrid_correlation   =  9;
+const static int implicit_error       = 10;
+const static int streak_error         = 11;
+const static int excursion_error      = 12;
+const static int excursion_fine_error = 13;
+const static int aic_squared_error    = 14;
+const static int aic_absolute_error   = 15;
+const static int count                = 16;
+
+// depreciated/unsupported fitness metrics
+const static int root_squared_error   = squared_error;
+const static int explog_error         = logarithmic_error;
+const static int akaike_information   = aic_absolute_error;
+const static int bayesian_information = aic_absolute_error;
+const static int slope_error          = absolute_error;
+const static int stats_error          = absolute_error;
+
 std::string str(int type);
 }
 
@@ -83,18 +94,20 @@ std::string str(int type)
 	{
 	case absolute_error:       return "Absolute Error";
 	case squared_error:        return "Squared Error";
-	case root_squared_error:   return "Root Squared Error";
-	case logarithmic_error:    return "Logarithmic Error";
-	case explog_error:         return "Exponetial Logarithmic Error";
+	case r_squared_error:      return "R^2 Goodness of Fit";
 	case correlation:          return "Correlation Coefficient";
-	case minimize_difference:  return "Minimize the Difference";
-	case akaike_information:   return "Akaike Information Criterion";
-	case bayesian_information: return "Bayesian Information Criterion";
 	case maximum_error:        return "Maximum Error";
+	case logarithmic_error:    return "Logarithmic Error";
 	case median_error:         return "Median Error";
+	case iqr_absolute_error:   return "Inter-quartile Absolute Error";
+	case minimize_difference:  return "Minimize the Difference";
+	case hybrid_correlation:   return "Hybrid Correlation Absolute Error";
 	case implicit_error:       return "Implicit Derivative Error";
-	case slope_error:          return "Slope Error";
-	case stats_error:          return "Error-Statistical Score";
+	case streak_error:         return "Streak Error";
+	case excursion_error:      return "Excursion Error";
+	case excursion_fine_error: return "Fine Excursion Error";
+	case aic_squared_error:    return "Absolute Error AIC";
+	case aic_absolute_error:   return "Squared Error AIC";
 	default:                   return "Unknown?";
 	}
 }

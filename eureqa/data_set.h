@@ -48,7 +48,7 @@ public:
 	int special_vars() const { return (int)Y_.size2(); }
 		  float& operator ()(int i, int j)       { return X_(i,j); }
 	const float& operator ()(int i, int j) const { return X_(i,j); }
-	void clear() { (*this) = data_set(); }
+	void clear() { data_set().swap(*this); }
 	void swap(data_set& d);
 	void resize(int rows, int cols);
 	bool empty() const { return (size() == 0); }
