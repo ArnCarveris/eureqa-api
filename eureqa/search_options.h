@@ -106,8 +106,8 @@ std::string str(int type)
 	case streak_error:         return "Streak Error";
 	case excursion_error:      return "Excursion Error";
 	case excursion_fine_error: return "Fine Excursion Error";
-	case aic_squared_error:    return "Absolute Error AIC";
-	case aic_absolute_error:   return "Squared Error AIC";
+	case aic_squared_error:    return "Squared Error AIC";
+	case aic_absolute_error:   return "Absolute Error AIC";
 	default:                   return "Unknown?";
 	}
 }
