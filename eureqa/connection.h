@@ -8,6 +8,8 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/math/special_functions/nonfinite_num_facets.hpp>
+#include <boost/archive/codecvt_null.hpp>
 #include <eureqa/data_set.h>
 #include <eureqa/server_info.h>
 #include <eureqa/search_progress.h>
@@ -148,6 +150,19 @@ public:
 	implementions:
 *--------------------------------------------------------------------------*/
 
+inline void handle_nan_inf(std::istream& is)
+{
+	std::locale default_locale(std::locale::classic(), new boost::archive::codecvt_null<char>);
+	std::locale my_locale(default_locale, new boost::math::nonfinite_num_get<char>);
+	is.imbue(my_locale);
+}
+inline void handle_nan_inf(std::ostream& os)
+{
+	std::locale default_locale(std::locale::classic(), new boost::archive::codecvt_null<char>);
+	std::locale my_locale(default_locale, new boost::math::nonfinite_num_put<char>);
+	os.imbue(my_locale);
+}
+
 inline 
 connection::connection() : 
 	socket_(default_io_service)
@@ -178,7 +193,8 @@ bool connection::send_data_set(const eureqa::data_set& data)
 {
 	// serialize the data set
 	std::ostringstream ss;
-	boost::archive::xml_oarchive ar(ss);
+	handle_nan_inf(ss);
+	boost::archive::xml_oarchive ar(ss, boost::archive::no_codecvt);
 	ar & boost::serialization::make_nvp("data_set", data );
 	
 	// send a command-code, packet size, and data packet
@@ -200,7 +216,8 @@ bool connection::send_options(const eureqa::search_options& options)
 {
 	// serialize the data set
 	std::ostringstream ss;
-	boost::archive::xml_oarchive ar(ss);
+	handle_nan_inf(ss);
+	boost::archive::xml_oarchive ar(ss, boost::archive::no_codecvt);
 	ar << boost::serialization::make_nvp("search_options", options );
 	
 	// send a command-code, packet size, and data packet
@@ -227,7 +244,8 @@ bool connection::send_individuals(const std::vector<solution_info>& individuals)
 {
 	// serialize the data set
 	std::ostringstream ss;
-	boost::archive::xml_oarchive ar(ss);
+	handle_nan_inf(ss);
+	boost::archive::xml_oarchive ar(ss, boost::archive::no_codecvt);
 	ar << boost::serialization::make_nvp("vector_solution_info", individuals );
 	
 	// send a command-code, packet size, and data packet
@@ -241,7 +259,8 @@ bool connection::send_population(const std::vector<eureqa::solution_info>& indiv
 {
 	// serialize the data set
 	std::ostringstream ss;
-	boost::archive::xml_oarchive ar(ss);
+	handle_nan_inf(ss);
+	boost::archive::xml_oarchive ar(ss, boost::archive::no_codecvt);
 	ar << boost::serialization::make_nvp("vector_solution_info", individuals );
 	
 	// send a command-code, packet size, and data packet
@@ -262,7 +281,8 @@ bool connection::query_progress(eureqa::search_progress& progress)
 	
 	// serialize store
 	std::istringstream ss(s);
-	boost::archive::xml_iarchive ar(ss);
+	handle_nan_inf(ss);
+	boost::archive::xml_iarchive ar(ss, boost::archive::no_codecvt);
 	ar >> boost::serialization::make_nvp("search_progress", progress );
 	return true;
 }
@@ -279,7 +299,8 @@ bool connection::query_server_info(eureqa::server_info& info)
 	
 	// serialize store
 	std::istringstream ss(s);
-	boost::archive::xml_iarchive ar(ss);
+	handle_nan_inf(ss);
+	boost::archive::xml_iarchive ar(ss, boost::archive::no_codecvt);
 	ar >> boost::serialization::make_nvp("server_info", info );
 	return true;
 }
@@ -306,7 +327,8 @@ bool connection::query_individuals(std::vector<solution_info>& individuals, int 
 	
 	// serialize
 	std::istringstream ss(s);
-	boost::archive::xml_iarchive ar(ss);
+	handle_nan_inf(ss);
+	boost::archive::xml_iarchive ar(ss, boost::archive::no_codecvt);
 	ar >> boost::serialization::make_nvp("vector_solution_info", individuals );
 	return true;
 }
@@ -323,7 +345,8 @@ bool connection::query_population(std::vector<eureqa::solution_info>& individual
 	
 	// serialize
 	std::istringstream ss(s);
-	boost::archive::xml_iarchive ar(ss);
+	handle_nan_inf(ss);
+	boost::archive::xml_iarchive ar(ss, boost::archive::no_codecvt);
 	ar >> boost::serialization::make_nvp("vector_solution_info", individuals );
 	return true;
 }
@@ -340,7 +363,8 @@ bool connection::query_frontier(eureqa::solution_frontier& frontier)
 	
 	// serialize store
 	std::istringstream is(packet);
-	boost::archive::xml_iarchive ar(is);
+	handle_nan_inf(is);
+	boost::archive::xml_iarchive ar(is, boost::archive::no_codecvt);
 	ar >> boost::serialization::make_nvp("solution_frontier", frontier);
 	return true;
 }
@@ -384,7 +408,8 @@ bool connection::calc_solution_info(std::vector<eureqa::solution_info>& individu
 {
 	// serialize the data set
 	std::ostringstream os;
-	boost::archive::xml_oarchive ar(os);
+	handle_nan_inf(os);
+	boost::archive::xml_oarchive ar(os, boost::archive::no_codecvt);
 	ar << boost::serialization::make_nvp("vector_solution_info", individuals);
 	
 	// send a command-code, packet size, and data packet
@@ -396,7 +421,8 @@ bool connection::calc_solution_info(std::vector<eureqa::solution_info>& individu
 	
 	// serialize
 	std::istringstream is(packet);
-	boost::archive::xml_iarchive ar2(is);
+	handle_nan_inf(is);
+	boost::archive::xml_iarchive ar2(is, boost::archive::no_codecvt);
 	ar2 >> boost::serialization::make_nvp("vector_solution_info", individuals);
 	return true;
 }
