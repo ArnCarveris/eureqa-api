@@ -9,7 +9,7 @@
 *--------------------------------------------------------*/
 
 
-#define EUREQUA_INLINE inline
+#define EUREQA_INLINE inline
 #include "eureqa_api.h"
 #include "eureqa_impl.h"
 
