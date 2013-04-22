@@ -62,7 +62,7 @@ public:
 	
 public:
 	// default constructor sets default options
-	search_options(std::string search_relationship = "0=f(0)");
+	search_options(std::string search_relationship = "0=f(x0)");
 	
 	// test if the options are entered and in range
 	bool is_valid() const;
