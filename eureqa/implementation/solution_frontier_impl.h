@@ -30,8 +30,8 @@ struct by_descending_score
 EUREQA_INLINE
 bool solution_info::dominates(const solution_info& s) const
 {
-	return (fitness_ <= s.fitness_ && complexity_ < s.complexity_)
-		|| (fitness_ < s.fitness_ && complexity_ <= s.complexity_);
+	return (fitness_ <= s.fitness_ && complexity_ <  s.complexity_)
+		|| (fitness_ <  s.fitness_ && complexity_ <= s.complexity_);
 }
 
 EUREQA_INLINE

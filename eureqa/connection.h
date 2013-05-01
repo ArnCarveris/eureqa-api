@@ -115,7 +115,7 @@ public:
 	bool pause_search();
 	bool end_search();
 	
-	// calculate the solution info on the server
+	// calculate information for the specified solutions (e.g. fitness, complexity) 
 	bool calc_solution_info(eureqa::solution_info& soln);
 	bool calc_solution_info(std::vector<eureqa::solution_info>& individuals);
 	
