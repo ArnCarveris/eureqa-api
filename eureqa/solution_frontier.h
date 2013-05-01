@@ -1,7 +1,17 @@
 #ifndef EUREQA_SOLUTION_FRONTIER_H
 #define EUREQA_SOLUTION_FRONTIER_H
 
+#include <boost/asio.hpp>
 #include <cmath>
+
+namespace boost
+{
+namespace serialization
+{
+class access;
+}
+}
+
 
 namespace eureqa
 {
@@ -17,7 +27,7 @@ public:
 
 public:
 	// constructor
-	solution_info(std::string text = "") : text_(text), score_(-1e30f), fitness_(-1e30f), age_(0) { }
+	solution_info(std::string text = "") : text_(text), score_(-1e30f), fitness_(-1e30f), complexity_(0), age_(0) { }
 
 	// tests if the solution dominates another solution in fitness and complexity
 	bool dominates(const solution_info& s) const;
