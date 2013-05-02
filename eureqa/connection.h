@@ -76,7 +76,7 @@ public:
 
 	// opens a network connection to a eureqa server
 	bool connect(std::string hostname, int port = default_port_tcp);
-	void disconnect() { socket_.close(); }
+	void disconnect();
 
 	// send server the data set over the network
 	// or tell it to load it from a network file
