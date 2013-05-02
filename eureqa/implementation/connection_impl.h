@@ -33,21 +33,23 @@ EUREQA_INLINE void handle_nan_inf(std::ostream& os)
 }
 
 EUREQA_INLINE 
-connection::connection() : 
-	socket_(default_io_service)
-{ }
+connection::connection() 
+{ 
+    create_socket(); 
+}
 
 EUREQA_INLINE
-connection::connection(std::string hostname, int port) :
-	socket_(default_io_service)
+connection::connection(std::string hostname, int port) 
 {
-	connect(hostname, port);
+    create_socket();
+    connect(hostname, port);
 }
 
 EUREQA_INLINE 
-connection::connection(boost::asio::io_service& io_service) : 
-	socket_(io_service)
-{ }
+connection::connection(boost::asio::io_service& io_service) 
+{ 
+    create_socket();
+}
 
 EUREQA_INLINE
 bool connection::connect(std::string hostname, int port)
@@ -55,6 +57,20 @@ bool connection::connect(std::string hostname, int port)
 	if (!connect_socket(hostname, port)) { return false; }
 	if (!read_response()) { return false; }
 	return true;
+}
+
+EUREQA_INLINE
+void connection::disconnect() 
+{ 
+    boost::system::error_code ec;
+
+    // attempt graceful shutdown of the connection before forcing the dtor
+    if (socket_->is_open()) 
+    {
+        socket_->shutdown(socket_->shutdown_both, ec);
+        //socket_->close();
+    }
+    create_socket(); 
 }
 
 EUREQA_INLINE
@@ -300,13 +316,13 @@ EUREQA_INLINE
 std::string connection::remote_address() const
 {
 	boost::system::error_code error;
-	return socket_.remote_endpoint(error).address().to_string();
+	return socket_->remote_endpoint(error).address().to_string();
 }
 EUREQA_INLINE 
 int connection::remote_port() const
 {
 	boost::system::error_code error;
-	return socket_.remote_endpoint(error).port();
+	return socket_->remote_endpoint(error).port();
 }
 
 EUREQA_INLINE
@@ -330,7 +346,7 @@ bool connection::connect_socket(std::string hostname, int port)
 	try
 	{
 		// resolve hostname into a tcp end point
-		boost::asio::ip::tcp::resolver resolver(socket_.get_io_service());
+		boost::asio::ip::tcp::resolver resolver(socket_->get_io_service());
 		boost::asio::ip::tcp::resolver::query query(hostname, boost::lexical_cast<std::string>(port));
 		boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 		boost::asio::ip::tcp::resolver::iterator end;
@@ -339,11 +355,11 @@ bool connection::connect_socket(std::string hostname, int port)
 		boost::system::error_code error = boost::asio::error::host_not_found;
 		while (error && endpoint_iterator != end)
 		{
-			socket_.close();
-			socket_.connect(*endpoint_iterator++, error);
+            create_socket();
+			socket_->connect(*endpoint_iterator++, error);
 		}
 		
-		if (error) { socket_.close(); }
+		if (error) { create_socket(); }
 		return !error;
 	}
 	catch (std::exception&) { return false; }
@@ -355,7 +371,7 @@ bool connection::write_fixed(const T& val)
 {
 	// write a primitive or fixed-sized object
 	boost::system::error_code error;
-	boost::asio::write(socket_, boost::asio::buffer(&val,sizeof(T)), boost::asio::transfer_all(), error);
+	boost::asio::write(get_socket(), boost::asio::buffer(&val,sizeof(T)), boost::asio::transfer_all(), error);
 	if (error) { disconnect(); }
 	return !error;
 }
@@ -367,7 +383,7 @@ bool connection::write_command_fixed(int cmd, const T& val)
 	// write a packet: a size/data pair
 	boost::system::error_code error;
 	boost::array<boost::asio::const_buffer, 2> packet = {{ boost::asio::buffer(&cmd,sizeof(int)), boost::asio::buffer(&val,sizeof(T)) }};
-	boost::asio::write(socket_, packet, boost::asio::transfer_all(), error);
+	boost::asio::write(get_socket(), packet, boost::asio::transfer_all(), error);
 	if (error) { disconnect(); }
 	return !error;
 }
@@ -384,7 +400,7 @@ bool connection::write_command_packet(int cmd, const void* buf, int num_bytes)
 	// write a packet: a size/data pair
 	boost::system::error_code error;
 	boost::array<boost::asio::const_buffer, 3> packet = {{ boost::asio::buffer(&cmd,sizeof(int)), boost::asio::buffer(&num_bytes,sizeof(int)), boost::asio::buffer(buf,num_bytes) }};
-	boost::asio::write(socket_, packet, boost::asio::transfer_all(), error);
+	boost::asio::write(get_socket(), packet, boost::asio::transfer_all(), error);
 	if (error) { disconnect(); }
 	return !error;
 }
@@ -402,14 +418,14 @@ bool connection::read_packet(std::vector<char>& buf)
 	// read size of packet
 	int num_bytes = 0;
 	boost::system::error_code error_header;
-	boost::asio::read(socket_, boost::asio::buffer(&num_bytes,sizeof(int)), boost::asio::transfer_all(), error_header);
+	boost::asio::read(get_socket(), boost::asio::buffer(&num_bytes,sizeof(int)), boost::asio::transfer_all(), error_header);
 	if (error_header) { disconnect(); }
 	if (error_header || num_bytes < 0) { return false; }
 	
 	// read data
 	buf.resize(num_bytes);
 	boost::system::error_code error_data;
-	if (num_bytes > 0) { boost::asio::read(socket_, boost::asio::buffer(&buf[0],num_bytes), boost::asio::transfer_all(), error_data); }
+	if (num_bytes > 0) { boost::asio::read(get_socket(), boost::asio::buffer(&buf[0],num_bytes), boost::asio::transfer_all(), error_data); }
 	if (error_data) { disconnect(); }
 	return !error_header && !error_data;
 }
@@ -430,7 +446,7 @@ bool connection::read_fixed(T& val)
 {
 	// read a primitive or fixed-sized object
 	boost::system::error_code error;
-	boost::asio::read(socket_, boost::asio::buffer(&val,sizeof(T)), boost::asio::transfer_all(), error);
+	boost::asio::read(get_socket(), boost::asio::buffer(&val,sizeof(T)), boost::asio::transfer_all(), error);
 	if (error) { disconnect(); }
 	return !error;
 }
@@ -441,6 +457,12 @@ bool connection::read_response()
 	if (!read_fixed(last_result_.value_)) { return false; }
 	if (!read_packet(last_result_.message_)) { return false; }
 	return true;
+}
+
+EUREQA_INLINE
+void connection::create_socket()
+{
+    socket_.reset(new boost::asio::ip::tcp::socket(default_io_service));
 }
 
 } // namespace eureqa

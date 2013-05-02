@@ -2,6 +2,7 @@
 #define EUREQA_CONNECTION_H
 
 #include <boost/asio.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <string>
 #include <vector>
@@ -60,7 +61,7 @@ std::ostream& operator <<(std::ostream& os, const command_result& r) { return os
 class connection
 {
 protected:
-	boost::asio::ip::tcp::socket socket_;
+	boost::scoped_ptr<boost::asio::ip::tcp::socket> socket_; /* always non-null */
 	command_result last_result_;
 	
 public:
@@ -71,12 +72,12 @@ public:
 	virtual ~connection() { disconnect(); }
 	
 	// basic connection information
-	bool is_connected() const { return socket_.is_open(); }
+	bool is_connected() const { return socket_->is_open(); }
 	command_result last_result() const { return last_result_; }
 
 	// opens a network connection to a eureqa server
 	bool connect(std::string hostname, int port = default_port_tcp);
-	void disconnect() { socket_.close(); }
+	void disconnect();
 
 	// send server the data set over the network
 	// or tell it to load it from a network file
@@ -138,6 +139,9 @@ public:
 	bool read_packet(std::string& s);
 	bool read_response();
 	
+private:
+	boost::asio::ip::tcp::socket &get_socket() { return *(socket_.get()); }
+	void create_socket();
 };
 
 void handle_nan_inf(std::istream& is);
