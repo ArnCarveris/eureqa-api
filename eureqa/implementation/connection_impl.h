@@ -61,11 +61,15 @@ EUREQA_INLINE
 void connection::disconnect() 
 { 
     boost::system::error_code ec;
-    // attempt graceful shutdown of the connection before forcing the dtor
-    socket_.shutdown(socket_.shutdown_both, ec);
-    
-    // reset socket (dtor closes the socket)
-    socket_ = boost::asio::ip::tcp::socket(default_io_service);
+
+    if (socket_.is_open()) 
+    {
+        // attempt graceful shutdown of the connection before forcing the dtor
+        socket_.shutdown(socket_.shutdown_both, ec);
+        
+        // reset socket (dtor closes the socket)
+        socket_.close();
+    }
 }
 
 
