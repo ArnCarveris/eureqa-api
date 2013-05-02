@@ -58,22 +58,6 @@ bool connection::connect(std::string hostname, int port)
 }
 
 EUREQA_INLINE
-void connection::disconnect() 
-{ 
-    boost::system::error_code ec;
-
-    if (socket_.is_open()) 
-    {
-        // attempt graceful shutdown of the connection before forcing the dtor
-        socket_.shutdown(socket_.shutdown_both, ec);
-        
-        // reset socket (dtor closes the socket)
-        socket_.close();
-    }
-}
-
-
-EUREQA_INLINE
 bool connection::send_data_set(const eureqa::data_set& data)
 {
 	// serialize the data set
