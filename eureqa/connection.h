@@ -45,14 +45,14 @@ static const int calc_solution_info = 401;
 struct command_result
 {
 public:
-	int value_;
-	std::string message_;
+    int value_;
+    std::string message_;
 public:
-	command_result() : value_(result_success) { }
-	command_result(int value, std::string message) : value_(value), message_(message) { }
-	int value() const { return value_; }
-	std::string message() const { return message_; }
-	operator const void*() const { return ((value_ == result_success)?this:0); }
+    command_result() : value_(result_success) { }
+    command_result(int value, std::string message) : value_(value), message_(message) { }
+    int value() const { return value_; }
+    std::string message() const { return message_; }
+    operator const void*() const { return ((value_ == result_success)?this:0); }
 };
 inline
 std::ostream& operator <<(std::ostream& os, const command_result& r) { return os << r.message(); }
@@ -61,87 +61,87 @@ std::ostream& operator <<(std::ostream& os, const command_result& r) { return os
 class connection
 {
 protected:
-	boost::scoped_ptr<boost::asio::ip::tcp::socket> socket_; /* always non-null */
-	command_result last_result_;
-	
+    boost::scoped_ptr<boost::asio::ip::tcp::socket> socket_; /* always non-null */
+    command_result last_result_;
+
 public:
-	// default constructor
-	connection();
-	connection(std::string hostname, int port = default_port_tcp);
-	connection(boost::asio::io_service& io_service);
-	virtual ~connection() { disconnect(); }
-	
-	// basic connection information
-	bool is_connected() const { return socket_->is_open(); }
-	command_result last_result() const { return last_result_; }
+    // default constructor
+    connection();
+    connection(std::string hostname, int port = default_port_tcp);
+    connection(boost::asio::io_service& io_service);
+    virtual ~connection() { disconnect(); }
 
-	// opens a network connection to a eureqa server
-	bool connect(std::string hostname, int port = default_port_tcp);
-	void disconnect();
+    // basic connection information
+    bool is_connected() const { return socket_->is_open(); }
+    command_result last_result() const { return last_result_; }
 
-	// send server the data set over the network
-	// or tell it to load it from a network file
-	bool send_data_set(const eureqa::data_set& data);
-	bool send_data_location(std::string path);
-	
-	// send server the search options
-	bool send_options(const eureqa::search_options& options);
-	
-	// send server individuals to insert into its population
-	bool send_individuals(std::string text);
-	bool send_individuals(eureqa::solution_info soln);
-	bool send_individuals(const std::vector<eureqa::solution_info>& individuals);
+    // opens a network connection to a eureqa server
+    bool connect(std::string hostname, int port = default_port_tcp);
+    void disconnect();
 
-	// send server a population
-	bool send_population(const std::vector<eureqa::solution_info>& individuals);
+    // send server the data set over the network
+    // or tell it to load it from a network file
+    bool send_data_set(const eureqa::data_set& data);
+    bool send_data_location(std::string path);
 
-	// query server for information on the search progress
-	bool query_progress(eureqa::search_progress& progress);
-	
-	// query server for its system information
-	bool query_server_info(eureqa::server_info& info);
-	
-	// query server for random individuals from its population
-	bool query_individuals(eureqa::solution_info& soln);
-	bool query_individuals(std::vector<eureqa::solution_info>& individuals, int count);
+    // send server the search options
+    bool send_options(const eureqa::search_options& options);
 
-	// query server for the current population
-	bool query_population(std::vector<eureqa::solution_info>& individuals);
-	
-	// query the servers local solution frontier
-	bool query_frontier(eureqa::solution_frontier& front);
-	
-	// tell server to start/pause/end searching
-	bool start_search();
-	bool pause_search();
-	bool end_search();
-	
-	// calculate information for the specified solutions (e.g. fitness, complexity) 
-	bool calc_solution_info(eureqa::solution_info& soln);
-	bool calc_solution_info(std::vector<eureqa::solution_info>& individuals);
-	
-	// returns are a short description of the connection
-	std::string summary() const;
-	std::string remote_address() const;
-	int remote_port() const;
-	
+    // send server individuals to insert into its population
+    bool send_individuals(std::string text);
+    bool send_individuals(eureqa::solution_info soln);
+    bool send_individuals(const std::vector<eureqa::solution_info>& individuals);
+
+    // send server a population
+    bool send_population(const std::vector<eureqa::solution_info>& individuals);
+
+    // query server for information on the search progress
+    bool query_progress(eureqa::search_progress& progress);
+
+    // query server for its system information
+    bool query_server_info(eureqa::server_info& info);
+
+    // query server for random individuals from its population
+    bool query_individuals(eureqa::solution_info& soln);
+    bool query_individuals(std::vector<eureqa::solution_info>& individuals, int count);
+
+    // query server for the current population
+    bool query_population(std::vector<eureqa::solution_info>& individuals);
+
+    // query the servers local solution frontier
+    bool query_frontier(eureqa::solution_frontier& front);
+
+    // tell server to start/pause/end searching
+    bool start_search();
+    bool pause_search();
+    bool end_search();
+
+    // calculate information for the specified solutions (e.g. fitness, complexity)
+    bool calc_solution_info(eureqa::solution_info& soln);
+    bool calc_solution_info(std::vector<eureqa::solution_info>& individuals);
+
+    // returns are a short description of the connection
+    std::string summary() const;
+    std::string remote_address() const;
+    int remote_port() const;
+
 //protected:
-	bool connect_socket(std::string hostname, int port);
+    bool connect_socket(std::string hostname, int port);
 
-	template<typename T> bool write_fixed(const T& val);
-	template<typename T> bool write_command_fixed(int cmd, const T& val);
-	bool write_command(int cmd);
-	bool write_command_packet(int cmd, const void* buf, int num_bytes);
-	bool write_command_packet(int cmd, const std::string& s);
-	
-	template<typename T> bool read_fixed(T& val);
-	bool read_packet(std::vector<char>& buf);
-	bool read_packet(std::string& s);
-	bool read_response();
-	
+    template<typename T> bool write_fixed(const T& val);
+    template<typename T> bool write_command_fixed(int cmd, const T& val);
+    bool write_command(int cmd);
+    bool write_command_packet(int cmd, const void* buf, int num_bytes);
+    bool write_command_packet(int cmd, const std::string& s);
+
+    template<typename T> bool read_fixed(T& val);
+    bool read_packet(std::vector<char>& buf);
+    bool read_packet(std::string& s);
+    bool read_response();
+
 private:
-	boost::asio::ip::tcp::socket &get_socket() { return *(socket_.get()); }
-	void create_socket();
+    boost::asio::ip::tcp::socket &get_socket() { return *(socket_.get()); }
+    void create_socket(boost::asio::io_service& io_service);
 };
 
 void handle_nan_inf(std::istream& is);
