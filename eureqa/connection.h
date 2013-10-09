@@ -39,6 +39,7 @@ static const int start_search       = 301;
 static const int pause_search       = 302;
 static const int end_search         = 303;
 static const int calc_solution_info = 401;
+static const int evaluate_expression = 402;
 }
 
 // info sent back from the server after non-query commands
@@ -119,6 +120,12 @@ public:
     // calculate information for the specified solutions (e.g. fitness, complexity)
     bool calc_solution_info(eureqa::solution_info& soln);
     bool calc_solution_info(std::vector<eureqa::solution_info>& individuals);
+
+    // calculate information for the specified solutions (e.g. fitness, complexity)
+    bool evaluate_expression(std::string const& expression, std::vector<double>& outputs);
+    bool evaluate_expression(std::string const& expression, int row, double& output);
+    bool evaluate_expression(std::string const& expression, int row, int series, double& output);
+    bool evaluate_expression(std::string const& expression, std::vector<std::pair<int,int> > const& series_and_rows, std::vector<double>& outputs);
 
     // returns are a short description of the connection
     std::string summary() const;

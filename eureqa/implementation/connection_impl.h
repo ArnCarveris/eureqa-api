@@ -314,6 +314,59 @@ bool connection::calc_solution_info(std::vector<eureqa::solution_info>& individu
 }
 
 EUREQA_INLINE
+bool connection::evaluate_expression(std::string const& expression, std::vector<double>& outputs)
+{
+    std::vector<std::pair<int,int> > series_and_rows; // empty means evaluate all series and rows
+    return evaluate_expression(expression, series_and_rows, outputs);
+}
+
+EUREQA_INLINE
+bool connection::evaluate_expression(std::string const& expression, int row, double& output)
+{
+    return evaluate_expression(expression, row, 0, output);
+}
+
+EUREQA_INLINE
+bool connection::evaluate_expression(std::string const& expression, int row, int series, double& output)
+{
+    std::vector<std::pair<int,int> > series_and_rows(1); // do a single series and row
+    series_and_rows[0].first  = series;
+    series_and_rows[0].second = row;
+    std::vector<double> outputs;
+    if (evaluate_expression(expression, series_and_rows, outputs) && outputs.size())
+    {
+        output = outputs[0];
+        return true;
+    }
+    return false;
+}
+
+EUREQA_INLINE
+bool connection::evaluate_expression(std::string const& expression, std::vector<std::pair<int,int> > const& series_and_rows, std::vector<double>& outputs)
+{
+    // serialize the data set
+    std::ostringstream os;
+    handle_nan_inf(os);
+    boost::archive::xml_oarchive ar(os, boost::archive::no_codecvt);
+    ar << boost::serialization::make_nvp("expression", expression);
+    ar << boost::serialization::make_nvp("series_and_rows", series_and_rows);
+
+    // send a command-code, packet size, and data packet
+    if (!write_command_packet(commands::evaluate_expression, os.str())) { return false; }
+
+    // read packet
+    std::string packet;
+    if (!read_packet(packet)) { return false; }
+
+    // serialize
+    std::istringstream is(packet);
+    handle_nan_inf(is);
+    boost::archive::xml_iarchive ar2(is, boost::archive::no_codecvt);
+    ar2 >> boost::serialization::make_nvp("outputs", outputs);
+    return true;
+}
+
+EUREQA_INLINE
 std::string connection::remote_address() const
 {
     boost::system::error_code error;
