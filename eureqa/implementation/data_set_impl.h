@@ -9,6 +9,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/serialization/binary_object.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/utility.hpp>
 
 namespace eureqa
 {
